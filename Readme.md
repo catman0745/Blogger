@@ -13,7 +13,7 @@ Set few environment variables:
 - `BLOGGER_AUTH_ISSUER` is some string (e.g. API)
 - `BLOGGER_AUTH_AUDIENCE` is some string (e.g. Client)
 - `BLOGGER_AUTH_LIFETIME` is token lifetime in minutes (e.g. 60)
-- `BLOGGER_AUTH_KEY` is jwt encryption key and it **MUST be at least 16 characters long** (e.g. blogger_token_key)
+- `BLOGGER_AUTH_KEY` is jwt encryption key and it **must be** at least 16 characters long (e.g. blogger_token_key)
 
 Apply migrations (run inside the cloned repo folder):
 ```

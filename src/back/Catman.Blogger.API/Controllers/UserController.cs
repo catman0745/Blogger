@@ -1,9 +1,10 @@
 namespace Catman.Blogger.API.Controllers
 {
     using System.Threading.Tasks;
+    using AutoMapper;
     using Catman.Blogger.API.Auth;
     using Catman.Blogger.API.Data;
-    using Microsoft.AspNetCore.Authorization;
+    using Catman.Blogger.API.DataTransferObjects.User;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
@@ -14,16 +15,19 @@ namespace Catman.Blogger.API.Controllers
     {
         private readonly BloggerDbContext _context;
         private readonly TokenHelper _tokenHelper;
+        private readonly IMapper _mapper;
 
-        public UserController(BloggerDbContext context, TokenHelper tokenHelper)
+        public UserController(BloggerDbContext context, TokenHelper tokenHelper, IMapper mapper)
         {
             _context = context;
             _tokenHelper = tokenHelper;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(User user)
+        public async Task<IActionResult> Register(UserRegisterDto registerDto)
         {
+            var user = _mapper.Map<User>(registerDto);
             if (await _context.Users.AnyAsync(u => u.Username == user.Username))
             {
                 return BadRequest("User with such username already exists");
@@ -36,15 +40,21 @@ namespace Catman.Blogger.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(User user)
+        public async Task<IActionResult> Login(UserLoginDto loginDto)
         {
-            if (!await _context.Users.AnyAsync(u => u.Username == user.Username && u.Password == user.Password))
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == loginDto.Username);
+            if (user == null)
             {
-                return BadRequest("Incorrect username or password");
+                return NotFound("User with such username does not exist");
+            }
+            if (user.Password != loginDto.Password)
+            {
+                return BadRequest("Incorrect password was provided");
             }
 
-            var token = _tokenHelper.GenerateToken(user);
-            return Ok(token);
+            var loggedDto = _mapper.Map<UserLoggedDto>(user);
+            loggedDto.Token = _tokenHelper.GenerateToken(user);
+            return Ok(loggedDto);
         }
     }
 }

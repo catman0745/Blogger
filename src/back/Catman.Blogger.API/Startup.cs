@@ -1,6 +1,7 @@
 namespace Catman.Blogger.API
 {
     using System;
+    using AutoMapper;
     using Catman.Blogger.API.Auth;
     using Catman.Blogger.API.Data;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -52,6 +53,8 @@ namespace Catman.Blogger.API
                         ClockSkew = TimeSpan.Zero
                     };
                 });
+            
+            services.AddAutoMapper(typeof(Startup));
             
             services.AddControllers();
         }
