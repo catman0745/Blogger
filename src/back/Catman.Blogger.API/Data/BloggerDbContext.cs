@@ -8,6 +8,8 @@ namespace Catman.Blogger.API.Data
         
         public DbSet<Blog> Blogs { get; set; }
         
+        public DbSet<Post> Posts { get; set; }
+        
         public BloggerDbContext(DbContextOptions<BloggerDbContext> options)
             : base(options)
         {
@@ -19,6 +21,12 @@ namespace Catman.Blogger.API.Data
             modelBuilder
                 .Entity<Blog>()
                 .HasIndex(blog => blog.Name)
+                .IsUnique();
+
+            // unique post title for each blog
+            modelBuilder
+                .Entity<Post>()
+                .HasIndex(post => new {post.Title, post.BlogId})
                 .IsUnique();
         }
     }
