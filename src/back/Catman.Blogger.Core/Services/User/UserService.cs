@@ -10,10 +10,10 @@ namespace Catman.Blogger.Core.Services.User
     public class UserService : Service, IUserService
     {
         private readonly BloggerDbContext _context;
-        private readonly TokenHelper _tokenHelper;
+        private readonly ITokenHelper _tokenHelper;
         private readonly IMapper _mapper;
 
-        public UserService(BloggerDbContext context, TokenHelper tokenHelper, IMapper mapper)
+        public UserService(BloggerDbContext context, ITokenHelper tokenHelper, IMapper mapper)
         {
             _context = context;
             _tokenHelper = tokenHelper;

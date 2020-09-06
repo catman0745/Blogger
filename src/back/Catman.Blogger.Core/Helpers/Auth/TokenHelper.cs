@@ -7,7 +7,7 @@ namespace Catman.Blogger.Core.Helpers.Auth
     using Catman.Blogger.Core.Models;
     using Microsoft.IdentityModel.Tokens;
 
-    public class TokenHelper
+    public class TokenHelper : ITokenHelper
     {
         private readonly IAuthOptions _options;
 

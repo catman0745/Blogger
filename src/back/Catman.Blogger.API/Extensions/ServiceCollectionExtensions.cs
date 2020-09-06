@@ -45,7 +45,7 @@ namespace Catman.Blogger.API.Extensions
             };
             services
                 .AddSingleton<IAuthOptions>(authOptions)
-                .AddSingleton<TokenHelper>()
+                .AddSingleton<ITokenHelper, TokenHelper>()
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
