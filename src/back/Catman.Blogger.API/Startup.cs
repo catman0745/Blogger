@@ -22,6 +22,7 @@ namespace Catman.Blogger.API
                 .ConfigureDbContext()
                 .ConfigureAuth()
                 .ConfigureMappings()
+                .ConfigureServices()
                 .AddControllers();
         }
 

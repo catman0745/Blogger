@@ -2,36 +2,36 @@ namespace Catman.Blogger.API.Controllers
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
-    using Catman.Blogger.API.Data;
     using Catman.Blogger.API.DataTransferObjects.Blog;
+    using Catman.Blogger.Core.Services.Blog;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
 
     [ApiController]
     [Route("api/blogs")]
     public class BlogController : ControllerBase
     {
-        private readonly BloggerDbContext _context;
+        private readonly IBlogService _blogs;
         private readonly IMapper _mapper;
 
-        public BlogController(BloggerDbContext context, IMapper mapper)
+        public BlogController(IBlogService blogs, IMapper mapper)
         {
-            _context = context;
+            _blogs = blogs;
             _mapper = mapper;
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var blog = await _context.Blogs.SingleOrDefaultAsync(b => b.Id == id);
-            if (blog == null)
+            var response = await _blogs.GetByIdAsync(id);
+            if (!response.Success)
             {
-                return NotFound();
+                return BadRequest(response.ErrorMessage);
             }
+            var blog = response.Result;
 
             var readDto = _mapper.Map<BlogReadDto>(blog);
             return Ok(readDto);
@@ -40,7 +40,8 @@ namespace Catman.Blogger.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var blogs = await _context.Blogs.ToListAsync();
+            var response = await _blogs.GetAllAsync();
+            var blogs = response.Result;
 
             var readDtos = _mapper.Map<ICollection<BlogReadDto>>(blogs);
             return Ok(readDtos);
@@ -48,67 +49,60 @@ namespace Catman.Blogger.API.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Create(BlogCreateDto createDto)
+        public async Task<IActionResult> Create(CreateBlogRequestDto createRequestDto)
         {
-            if (await _context.Blogs.AnyAsync(b => b.Name == createDto.Name))
+            var createRequest = _mapper.Map<CreateBlogRequest>(createRequestDto);
+            createRequest.Username = User.Identity.Name;
+
+            var response = await _blogs.CreateAsync(createRequest);
+            if (!response.Success)
             {
-                return BadRequest("Blog with such name already exists");
+                return BadRequest(response.ErrorMessage);
             }
+            var blog = response.Result;
 
-            var blog = _mapper.Map<Blog>(createDto);
-            blog.CreatedAt = DateTime.UtcNow;
-            blog.OwnerUsername = User.Identity.Name;
-
-            _context.Blogs.Add(blog);
-            await _context.SaveChangesAsync();
-
-            return Ok();
+            var readDto = _mapper.Map<BlogReadDto>(blog);
+            return StatusCode(StatusCodes.Status201Created, readDto);
         }
 
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(Guid id, BlogEditDto editDto)
+        public async Task<IActionResult> Edit(Guid id, EditBlogRequestDto editRequestDto)
         {
-            var blog = await _context.Blogs.SingleOrDefaultAsync(b => b.Id == id);
-            if (blog == null)
-            {
-                return NotFound();
-            }
-            if (blog.OwnerUsername != User.Identity.Name)
-            {
-                return BadRequest("You are not the owner of this blog");
-            }
+            var editRequest = _mapper.Map<EditBlogRequest>(editRequestDto);
+            editRequest.Id = id;
+            editRequest.Username = User.Identity.Name;
 
-            var otherBlogs = _context.Blogs.Where(b => b.Id != blog.Id);
-            if (await otherBlogs.AnyAsync(b => b.Name == editDto.Name && b.Id != blog.Id))
+            var response = await _blogs.EditAsync(editRequest);
+            if (!response.Success)
             {
-                return BadRequest("Blog name already taken");
+                return BadRequest(response.ErrorMessage);
             }
+            var blog = response.Result;
 
-            _mapper.Map(editDto, blog);
-            await _context.SaveChangesAsync();
-
-            return Ok();
+            var readDto = _mapper.Map<BlogReadDto>(blog);
+            return Ok(readDto);
         }
 
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var blog = await _context.Blogs.SingleOrDefaultAsync(b => b.Id == id);
-            if (blog == null)
+            var deleteRequest = new DeleteBlogRequest()
             {
-                return NotFound();
-            }
-            if (blog.OwnerUsername != User.Identity.Name)
+                Id = id,
+                Username = User.Identity.Name
+            };
+
+            var response = await _blogs.DeleteAsync(deleteRequest);
+            if (!response.Success)
             {
-                return BadRequest("You are not the owner of this blog");
+                return BadRequest(response.ErrorMessage);
             }
+            var blog = response.Result;
 
-            _context.Blogs.Remove(blog);
-            await _context.SaveChangesAsync();
-
-            return Ok();
+            var readDto = _mapper.Map<BlogReadDto>(blog);
+            return Ok(readDto);
         }
     }
 }

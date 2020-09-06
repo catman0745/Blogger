@@ -2,9 +2,13 @@ namespace Catman.Blogger.API.Extensions
 {
     using System;
     using AutoMapper;
-    using Catman.Blogger.API.Auth;
-    using Catman.Blogger.API.Data;
     using Catman.Blogger.API.Exceptions;
+    using Catman.Blogger.Core;
+    using Catman.Blogger.Core.Helpers.Auth;
+    using Catman.Blogger.Core.Services.Blog;
+    using Catman.Blogger.Core.Services.Common;
+    using Catman.Blogger.Core.Services.Post;
+    using Catman.Blogger.Core.Services.User;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +21,16 @@ namespace Catman.Blogger.API.Extensions
             var connectionString = GetEnvironmentVariable("BLOGGER_DB_CONNECTION");
             services.AddDbContext<BloggerDbContext>(options => options.UseNpgsql(connectionString));
             
+            return services;
+        }
+
+        public static IServiceCollection ConfigureServices(this IServiceCollection services)
+        {
+            services
+                .AddScoped<IUserService, UserService>()
+                .AddScoped<IBlogService, BlogService>()
+                .AddScoped<IPostService, PostService>();
+
             return services;
         }
 
@@ -54,7 +68,9 @@ namespace Catman.Blogger.API.Extensions
 
         public static IServiceCollection ConfigureMappings(this IServiceCollection services)
         {
-            services.AddAutoMapper(typeof(Startup));
+            services
+                .AddAutoMapper(typeof(Startup))  // mappings from API
+                .AddAutoMapper(typeof(Service)); // mappings from Core
             
             return services;
         }

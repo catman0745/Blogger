@@ -2,58 +2,50 @@ namespace Catman.Blogger.API.Controllers
 {
     using System.Threading.Tasks;
     using AutoMapper;
-    using Catman.Blogger.API.Auth;
-    using Catman.Blogger.API.Data;
     using Catman.Blogger.API.DataTransferObjects.User;
+    using Catman.Blogger.Core.Services.User;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
 
     [ApiController]
     [Route("api/users")]
     public class UserController : ControllerBase
     {
-        private readonly BloggerDbContext _context;
-        private readonly TokenHelper _tokenHelper;
+        private readonly IUserService _users;
         private readonly IMapper _mapper;
 
-        public UserController(BloggerDbContext context, TokenHelper tokenHelper, IMapper mapper)
+        public UserController(IUserService users, IMapper mapper)
         {
-            _context = context;
-            _tokenHelper = tokenHelper;
+            _users = users;
             _mapper = mapper;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(UserRegisterDto registerDto)
+        public async Task<IActionResult> Register(RegisterUserRequestDto registerRequestDto)
         {
-            var user = _mapper.Map<User>(registerDto);
-            if (await _context.Users.AnyAsync(u => u.Username == user.Username))
+            var registerRequest = _mapper.Map<RegisterUserRequest>(registerRequestDto);
+            
+            var response = await _users.RegisterAsync(registerRequest);
+            if (!response.Success)
             {
-                return BadRequest("User with such username already exists");
+                return BadRequest(response.ErrorMessage);
             }
-
-            _context.Add(user);
-            await _context.SaveChangesAsync();
 
             return StatusCode(StatusCodes.Status201Created);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(UserLoginDto loginDto)
+        public async Task<IActionResult> Login(LoginUserRequestDto loginRequestDto)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == loginDto.Username);
-            if (user == null)
+            var loginRequest = _mapper.Map<LoginUserRequest>(loginRequestDto);
+
+            var result = await _users.LoginAsync(loginRequest);
+            if (!result.Success)
             {
-                return NotFound("User with such username does not exist");
-            }
-            if (user.Password != loginDto.Password)
-            {
-                return BadRequest("Incorrect password was provided");
+                return BadRequest(result.ErrorMessage);
             }
 
-            var loggedDto = _mapper.Map<UserLoggedDto>(user);
-            loggedDto.Token = _tokenHelper.GenerateToken(user);
+            var loggedDto = _mapper.Map<LoginUserResultDto>(result.Result);
             return Ok(loggedDto);
         }
     }
