@@ -44,7 +44,7 @@ namespace Catman.Blogger.API.Extensions
                 Key = GetEnvironmentVariable("BLOGGER_AUTH_KEY")
             };
             services
-                .AddSingleton(authOptions)
+                .AddSingleton<IAuthOptions>(authOptions)
                 .AddSingleton<TokenHelper>()
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

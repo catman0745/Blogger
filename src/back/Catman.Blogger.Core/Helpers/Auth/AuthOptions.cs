@@ -4,7 +4,7 @@ namespace Catman.Blogger.Core.Helpers.Auth
     using System.Text;
     using Microsoft.IdentityModel.Tokens;
 
-    public class AuthOptions
+    public class AuthOptions : IAuthOptions
     {
         public string Issuer { get; set; }
         

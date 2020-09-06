@@ -9,9 +9,9 @@ namespace Catman.Blogger.Core.Helpers.Auth
 
     public class TokenHelper
     {
-        private readonly AuthOptions _options;
+        private readonly IAuthOptions _options;
 
-        public TokenHelper(AuthOptions options)
+        public TokenHelper(IAuthOptions options)
         {
             _options = options;
         }
