@@ -20,6 +20,7 @@ namespace Catman.Blogger.API
         {
             services
                 .ConfigureDbContext()
+                .ConfigureTimeHelper()
                 .ConfigureAuth()
                 .ConfigureMappings()
                 .ConfigureServices()

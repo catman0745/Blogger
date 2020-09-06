@@ -4,6 +4,7 @@ namespace Catman.Blogger.Core.Services.Post
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using AutoMapper;
+    using Catman.Blogger.Core.Helpers.Time;
     using Catman.Blogger.Core.Models;
     using Catman.Blogger.Core.Services.Common;
     using Microsoft.EntityFrameworkCore;
@@ -12,11 +13,13 @@ namespace Catman.Blogger.Core.Services.Post
     {
         private readonly BloggerDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ITimeHelper _timeHelper;
 
-        public PostService(BloggerDbContext context, IMapper mapper)
+        public PostService(BloggerDbContext context, IMapper mapper, ITimeHelper timeHelper)
         {
             _context = context;
             _mapper = mapper;
+            _timeHelper = timeHelper;
         }
         
         public async Task<Response<Post>> CreateAsync(CreatePostRequest createRequest)
@@ -37,7 +40,7 @@ namespace Catman.Blogger.Core.Services.Post
             }
 
             var post = _mapper.Map<Post>(createRequest);
-            post.CreatedAt = DateTime.UtcNow;
+            post.CreatedAt = _timeHelper.Now;
             post.LastUpdate = post.CreatedAt;
 
             _context.Posts.Add(post);
@@ -90,7 +93,7 @@ namespace Catman.Blogger.Core.Services.Post
             }
 
             _mapper.Map(editRequest, post);
-            post.LastUpdate = DateTime.UtcNow;
+            post.LastUpdate = _timeHelper.Now;
             
             _context.Posts.Update(post);
             await _context.SaveChangesAsync();

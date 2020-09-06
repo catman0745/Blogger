@@ -5,6 +5,7 @@ namespace Catman.Blogger.API.Extensions
     using Catman.Blogger.API.Exceptions;
     using Catman.Blogger.Core;
     using Catman.Blogger.Core.Helpers.Auth;
+    using Catman.Blogger.Core.Helpers.Time;
     using Catman.Blogger.Core.Services.Blog;
     using Catman.Blogger.Core.Services.Common;
     using Catman.Blogger.Core.Services.Post;
@@ -62,6 +63,13 @@ namespace Catman.Blogger.API.Extensions
                         ClockSkew = TimeSpan.Zero
                     };
                 });
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureTimeHelper(this IServiceCollection services)
+        {
+            services.AddSingleton<ITimeHelper, TimeHelper>();
 
             return services;
         }
