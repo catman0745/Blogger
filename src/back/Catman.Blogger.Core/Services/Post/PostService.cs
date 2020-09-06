@@ -6,35 +6,44 @@ namespace Catman.Blogger.Core.Services.Post
     using AutoMapper;
     using Catman.Blogger.Core.Helpers.Time;
     using Catman.Blogger.Core.Models;
+    using Catman.Blogger.Core.Repositories;
     using Catman.Blogger.Core.Services.Common;
-    using Microsoft.EntityFrameworkCore;
 
     public class PostService : Service, IPostService
     {
-        private readonly BloggerDbContext _context;
+        private readonly IPostRepository _posts;
+        private readonly IBlogRepository _blogs;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ITimeHelper _timeHelper;
 
-        public PostService(BloggerDbContext context, IMapper mapper, ITimeHelper timeHelper)
+        public PostService(
+            IPostRepository posts,
+            IBlogRepository blogs,
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            ITimeHelper timeHelper)
         {
-            _context = context;
+            _posts = posts;
+            _blogs = blogs;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _timeHelper = timeHelper;
         }
         
         public async Task<Response<Post>> CreateAsync(CreatePostRequest createRequest)
         {
-            if (!await _context.Blogs.AnyAsync(b => b.Id == createRequest.BlogId))
+            if (!await _blogs.ExistsAsync(createRequest.BlogId))
             {
                 return Failure<Post>("Blog does not exist");
             }
             
-            var blog = await _context.Blogs.SingleAsync(b => b.Id == createRequest.BlogId);
+            var blog = await _blogs.GetAsync(createRequest.BlogId);
             if (blog.OwnerUsername != createRequest.Username)
             {
                 return Failure<Post>("You do not have permission to add posts to this blog");
             }
-            if (await _context.Posts.AnyAsync(p => p.Title == createRequest.Title && p.BlogId == blog.Id))
+            if (await _posts.ExistsAsync(createRequest.Title, blog.Id))
             {
                 return Failure<Post>("Post with such title already exists");
             }
@@ -43,47 +52,46 @@ namespace Catman.Blogger.Core.Services.Post
             post.CreatedAt = _timeHelper.Now;
             post.LastUpdate = post.CreatedAt;
 
-            _context.Posts.Add(post);
-            await _context.SaveChangesAsync();
+            _posts.Add(post);
+            await _unitOfWork.SaveChangesAsync();
 
             return Success(post);
         }
 
         public async Task<Response<Post>> GetByIdAsync(Guid id)
         {
-            if (!await _context.Posts.AnyAsync(p => p.Id == id))
+            if (!await _posts.ExistsAsync(id))
             {
                 return Failure<Post>("Post with such id does not exist");
             }
 
-            var post = await _context.Posts.SingleAsync(p => p.Id == id);
+            var post = await _posts.GetAsync(id);
             return Success(post);
         }
 
         public async Task<Response<ICollection<Post>>> GetAllAsync()
         {
-            ICollection<Post> posts = await _context.Posts.ToListAsync();
+            var posts = await _posts.GetAsync();
             return Success(posts);
         }
 
         public async Task<Response<Post>> EditAsync(EditPostRequest editRequest)
         {
-            if (!await _context.Posts.AnyAsync(p => p.Id == editRequest.Id))
+            if (!await _posts.ExistsAsync(editRequest.Id))
             {
                 return Failure<Post>("Post with such id does not exist");
             }
             
-            var post = await _context.Posts.SingleAsync(p => p.Id == editRequest.Id);
-            var blog = await _context.Blogs.SingleAsync(b => b.Id == post.BlogId);
+            var post = await _posts.GetAsync(editRequest.Id);
+            var blog = await _blogs.GetAsync(post.BlogId);
             if (blog.OwnerUsername != editRequest.Username)
             {
                 return Failure<Post>("You do not have permission to edit this post");
             }
             
-            if (await _context.Posts.AnyAsync(p => p.Title == editRequest.Title && p.BlogId == blog.Id))
+            if (await _posts.ExistsAsync(editRequest.Title, blog.Id))
             {
-                var postWithSameName =
-                    await _context.Posts.SingleAsync(p => p.Title == editRequest.Title && p.Id == blog.Id);
+                var postWithSameName = await _posts.GetAsync(editRequest.Title, blog.Id);
                 
                 // allow unchanged post title
                 if (postWithSameName.Id != editRequest.Id)
@@ -95,28 +103,28 @@ namespace Catman.Blogger.Core.Services.Post
             _mapper.Map(editRequest, post);
             post.LastUpdate = _timeHelper.Now;
             
-            _context.Posts.Update(post);
-            await _context.SaveChangesAsync();
+            _posts.Update(post);
+            await _unitOfWork.SaveChangesAsync();
 
             return Success(post);
         }
 
         public async Task<Response<Post>> DeleteAsync(DeletePostRequest deleteRequest)
         {
-            if (!await _context.Posts.AnyAsync(p => p.Id == deleteRequest.Id))
+            if (!await _posts.ExistsAsync(deleteRequest.Id))
             {
                 return Failure<Post>("Post with such id does not exist");
             }
             
-            var post = await _context.Posts.SingleAsync(p => p.Id == deleteRequest.Id);
-            var blog = await _context.Blogs.SingleAsync(b => b.Id == post.BlogId);
+            var post = await _posts.GetAsync(deleteRequest.Id);
+            var blog = await _blogs.GetAsync(post.BlogId);
             if (blog.OwnerUsername != deleteRequest.Username)
             {
                 return Failure<Post>("You do not have permission to delete this post");
             }
 
-            _context.Posts.Remove(post);
-            await _context.SaveChangesAsync();
+            _posts.Remove(post);
+            await _unitOfWork.SaveChangesAsync();
 
             return Success(post);
         }

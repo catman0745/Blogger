@@ -1,8 +1,9 @@
-namespace Catman.Blogger.Core
+namespace Catman.Blogger.Data
 {
     using Catman.Blogger.Core.Models;
+    using Catman.Blogger.Data.EntitiesConfigurations;
     using Microsoft.EntityFrameworkCore;
-
+    
     public class BloggerDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
@@ -18,17 +19,9 @@ namespace Catman.Blogger.Core
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // unique blog name
-            modelBuilder
-                .Entity<Blog>()
-                .HasIndex(blog => blog.Name)
-                .IsUnique();
-
-            // unique post title for each blog
-            modelBuilder
-                .Entity<Post>()
-                .HasIndex(post => new {post.Title, post.BlogId})
-                .IsUnique();
+            modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new BlogEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new PostEntityConfiguration());
         }
     }
 }

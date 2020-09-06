@@ -4,44 +4,46 @@ namespace Catman.Blogger.Core.Services.User
     using AutoMapper;
     using Catman.Blogger.Core.Helpers.Auth;
     using Catman.Blogger.Core.Models;
+    using Catman.Blogger.Core.Repositories;
     using Catman.Blogger.Core.Services.Common;
-    using Microsoft.EntityFrameworkCore;
 
     public class UserService : Service, IUserService
     {
-        private readonly BloggerDbContext _context;
+        private readonly IUserRepository _users;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenHelper _tokenHelper;
         private readonly IMapper _mapper;
 
-        public UserService(BloggerDbContext context, ITokenHelper tokenHelper, IMapper mapper)
+        public UserService(IUserRepository users, IUnitOfWork unitOfWork, ITokenHelper tokenHelper, IMapper mapper)
         {
-            _context = context;
+            _users = users;
+            _unitOfWork = unitOfWork;
             _tokenHelper = tokenHelper;
             _mapper = mapper;
         }
         
         public async Task<Response<User>> RegisterAsync(RegisterUserRequest registerRequest)
         {
-            if (await _context.Users.AnyAsync(u => u.Username == registerRequest.Username))
+            if (await _users.ExistsAsync(registerRequest.Username))
             {
                 return Failure<User>("User with such username already exists");
             }
 
             var user = _mapper.Map<User>(registerRequest);
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            _users.Add(user);
+            await _unitOfWork.SaveChangesAsync();
 
             return Success(user);
         }
 
         public async Task<Response<LoginUserResult>> LoginAsync(LoginUserRequest loginRequest)
         {
-            if (!await _context.Users.AnyAsync(u => u.Username == loginRequest.Username))
+            if (!await _users.ExistsAsync(loginRequest.Username))
             {
                 return Failure<LoginUserResult>("User with such username does not exist");
             }
 
-            var user = await _context.Users.SingleAsync(u => u.Username == loginRequest.Username);
+            var user = await _users.GetAsync(loginRequest.Username);
             if (user.Password != loginRequest.Password)
             {
                 return Failure<LoginUserResult>("Incorrect password");

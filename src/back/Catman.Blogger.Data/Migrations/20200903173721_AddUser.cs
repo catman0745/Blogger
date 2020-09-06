@@ -1,4 +1,4 @@
-﻿namespace Catman.Blogger.Core.Migrations
+﻿namespace Catman.Blogger.Data.Migrations
 {
     using Microsoft.EntityFrameworkCore.Migrations;
 

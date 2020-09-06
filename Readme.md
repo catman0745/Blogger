@@ -17,7 +17,7 @@ Set few environment variables:
 
 Apply migrations (run inside the cloned repo folder):
 ```
-dotnet ef database update -s src/back/Catman.Blogger.API -p src/back/Catman.Blogger.Core
+dotnet ef database update -s src/back/Catman.Blogger.API -p src/back/Catman.Blogger.Data
 ```
 
 Start the API (default address is `localhost` on port `5000`):

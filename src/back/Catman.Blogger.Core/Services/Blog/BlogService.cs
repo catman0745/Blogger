@@ -5,23 +5,25 @@ namespace Catman.Blogger.Core.Services.Blog
     using System.Threading.Tasks;
     using AutoMapper;
     using Catman.Blogger.Core.Models;
+    using Catman.Blogger.Core.Repositories;
     using Catman.Blogger.Core.Services.Common;
-    using Microsoft.EntityFrameworkCore;
 
     public class BlogService : Service, IBlogService
     {
-        private readonly BloggerDbContext _context;
+        private readonly IBlogRepository _blogs;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public BlogService(BloggerDbContext context, IMapper mapper)
+        public BlogService(IBlogRepository blogs, IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _context = context;
+            _blogs = blogs;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
         
         public async Task<Response<Blog>> CreateAsync(CreateBlogRequest createRequest)
         {
-            if (await _context.Blogs.AnyAsync(b => b.Name == createRequest.Name))
+            if (await _blogs.ExistsAsync(createRequest.Name))
             {
                 return Failure<Blog>("Blog with such name already exists");
             }
@@ -29,39 +31,39 @@ namespace Catman.Blogger.Core.Services.Blog
             var blog = _mapper.Map<Blog>(createRequest);
             blog.CreatedAt = DateTime.UtcNow;
 
-            _context.Blogs.Add(blog);
-            await _context.SaveChangesAsync();
+            _blogs.Add(blog);
+            await _unitOfWork.SaveChangesAsync();
 
             return Success(blog);
         }
 
         public async Task<Response<Blog>> GetByIdAsync(Guid id)
         {
-            if (!await _context.Blogs.AnyAsync(b => b.Id == id))
+            if (!await _blogs.ExistsAsync(id))
             {
                 return Failure<Blog>("Blog with such id does not exist");
             }
 
-            var blog = await _context.Blogs.SingleAsync(b => b.Id == id);
+            var blog = await _blogs.GetAsync(id);
             return Success(blog);
         }
 
         public async Task<Response<ICollection<Blog>>> GetAllAsync()
         {
-            ICollection<Blog> blogs = await _context.Blogs.ToListAsync();
+            var blogs = await _blogs.GetAsync();
             return Success(blogs);
         }
 
         public async Task<Response<Blog>> EditAsync(EditBlogRequest editRequest)
         {
-            if (!await _context.Blogs.AnyAsync(b => b.Id == editRequest.Id))
+            if (!await _blogs.ExistsAsync(editRequest.Id))
             {
                 return Failure<Blog>("Blog with such id does not exist");
             }
 
-            if (await _context.Blogs.AnyAsync(b => b.Name == editRequest.Name))
+            if (await _blogs.ExistsAsync(editRequest.Name))
             {
-                var blogWithSameName = await _context.Blogs.SingleAsync(b => b.Name == editRequest.Name);
+                var blogWithSameName = await _blogs.GetAsync(editRequest.Name);
                 
                 // allow unchanged blog name
                 if (blogWithSameName.Id != editRequest.Id)
@@ -70,34 +72,34 @@ namespace Catman.Blogger.Core.Services.Blog
                 }
             }
             
-            var blog = await _context.Blogs.SingleAsync(b => b.Id == editRequest.Id);
+            var blog = await _blogs.GetAsync(editRequest.Id);
             if (blog.OwnerUsername != editRequest.Username)
             {
                 return Failure<Blog>("You do not have permission to edit this blog");
             }
 
             _mapper.Map(editRequest, blog);
-            _context.Blogs.Update(blog);
-            await _context.SaveChangesAsync();
+            _blogs.Update(blog);
+            await _unitOfWork.SaveChangesAsync();
 
             return Success(blog);
         }
 
         public async Task<Response<Blog>> DeleteAsync(DeleteBlogRequest deleteRequest)
         {
-            if (!await _context.Blogs.AnyAsync(b => b.Id == deleteRequest.Id))
+            if (!await _blogs.ExistsAsync(deleteRequest.Id))
             {
                 return Failure<Blog>("Blog with such id does not exist");
             }
             
-            var blog = await _context.Blogs.SingleAsync(b => b.Id == deleteRequest.Id);
+            var blog = await _blogs.GetAsync(deleteRequest.Id);
             if (blog.OwnerUsername != deleteRequest.Username)
             {
                 return Failure<Blog>("You do not have permission to delete this blog");
             }
 
-            _context.Blogs.Remove(blog);
-            await _context.SaveChangesAsync();
+            _blogs.Remove(blog);
+            await _unitOfWork.SaveChangesAsync();
 
             return Success(blog);
         }
