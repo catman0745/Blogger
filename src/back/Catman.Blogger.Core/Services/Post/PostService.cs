@@ -70,7 +70,7 @@ namespace Catman.Blogger.Core.Services.Post
         {
             if (!await _context.Posts.AnyAsync(p => p.Id == editRequest.Id))
             {
-                return Failure<Post>("Post with such id doest not exist");
+                return Failure<Post>("Post with such id does not exist");
             }
             
             var post = await _context.Posts.SingleAsync(p => p.Id == editRequest.Id);
@@ -105,7 +105,7 @@ namespace Catman.Blogger.Core.Services.Post
         {
             if (!await _context.Posts.AnyAsync(p => p.Id == deleteRequest.Id))
             {
-                return Failure<Post>("Post with such id doest not exist");
+                return Failure<Post>("Post with such id does not exist");
             }
             
             var post = await _context.Posts.SingleAsync(p => p.Id == deleteRequest.Id);

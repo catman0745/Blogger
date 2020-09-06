@@ -38,7 +38,7 @@ namespace Catman.Blogger.Core.Services.User
         {
             if (!await _context.Users.AnyAsync(u => u.Username == loginRequest.Username))
             {
-                return Failure<LoginUserResult>("User with such username doest not exist");
+                return Failure<LoginUserResult>("User with such username does not exist");
             }
 
             var user = await _context.Users.SingleAsync(u => u.Username == loginRequest.Username);
