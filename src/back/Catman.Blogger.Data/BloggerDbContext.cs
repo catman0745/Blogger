@@ -12,6 +12,8 @@ namespace Catman.Blogger.Data
         
         public DbSet<Post> Posts { get; set; }
         
+        public DbSet<Image> Images { get; set; }
+        
         public BloggerDbContext(DbContextOptions<BloggerDbContext> options)
             : base(options)
         {
@@ -22,6 +24,7 @@ namespace Catman.Blogger.Data
             modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
             modelBuilder.ApplyConfiguration(new BlogEntityConfiguration());
             modelBuilder.ApplyConfiguration(new PostEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new ImageEntityConfiguration());
         }
     }
 }

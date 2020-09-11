@@ -4,10 +4,12 @@ namespace Catman.Blogger.API.Extensions
     using AutoMapper;
     using Catman.Blogger.API.Exceptions;
     using Catman.Blogger.Core.Helpers.Auth;
+    using Catman.Blogger.Core.Helpers.File;
     using Catman.Blogger.Core.Helpers.Time;
     using Catman.Blogger.Core.Repositories;
     using Catman.Blogger.Core.Services.Blog;
     using Catman.Blogger.Core.Services.Common;
+    using Catman.Blogger.Core.Services.Image;
     using Catman.Blogger.Core.Services.Post;
     using Catman.Blogger.Core.Services.User;
     using Catman.Blogger.Data;
@@ -33,7 +35,8 @@ namespace Catman.Blogger.API.Extensions
                 .AddScoped<IUnitOfWork, UnitOfWork>()
                 .AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IBlogRepository, BlogRepository>()
-                .AddScoped<IPostRepository, PostRepository>();
+                .AddScoped<IPostRepository, PostRepository>()
+                .AddScoped<IImageRepository, ImageRepository>();
 
             return services;
         }
@@ -43,7 +46,8 @@ namespace Catman.Blogger.API.Extensions
             services
                 .AddScoped<IUserService, UserService>()
                 .AddScoped<IBlogService, BlogService>()
-                .AddScoped<IPostService, PostService>();
+                .AddScoped<IPostService, PostService>()
+                .AddScoped<IImageService, ImageService>();
 
             return services;
         }
@@ -83,6 +87,22 @@ namespace Catman.Blogger.API.Extensions
         public static IServiceCollection ConfigureTimeHelper(this IServiceCollection services)
         {
             services.AddSingleton<ITimeHelper, TimeHelper>();
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureFileHelper(this IServiceCollection services)
+        {
+            var fileOptions = new FileOptions()
+            {
+                MaxImageSize = long.Parse(GetEnvironmentVariable("BLOGGER_FILES_IMG_MAX_MB")) * 1024 * 1024,
+                SupportedImageTypes = GetEnvironmentVariable("BLOGGER_FILES_IMG_TYPES").Split(';'),
+                UploadsDirectoryPath = GetEnvironmentVariable("BLOGGER_FILES_UPLOAD_DIR")
+            };
+            
+            services
+                .AddSingleton<IFileOptions>(fileOptions)
+                .AddSingleton<IFileHelper, FileHelper>();
 
             return services;
         }

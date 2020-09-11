@@ -22,6 +22,7 @@ namespace Catman.Blogger.API
                 .ConfigureDbContext()
                 .ConfigureRepositories()
                 .ConfigureTimeHelper()
+                .ConfigureFileHelper()
                 .ConfigureAuth()
                 .ConfigureMappings()
                 .ConfigureServices()
@@ -39,6 +40,8 @@ namespace Catman.Blogger.API
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
