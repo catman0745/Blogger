@@ -12,5 +12,8 @@ namespace Catman.Blogger.API.DataTransferObjects.User
         
         [JsonPropertyName("token")]
         public string Token { get; set; }
+        
+        [JsonPropertyName("avatarUrl")]
+        public string AvatarUrl { get; set; }
     }
 }

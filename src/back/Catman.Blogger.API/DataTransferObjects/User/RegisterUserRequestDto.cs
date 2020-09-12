@@ -19,5 +19,9 @@ namespace Catman.Blogger.API.DataTransferObjects.User
         [StringLength(25, ErrorMessage = "password cannot be longer than {1} characters")]
         [JsonPropertyName("password")]
         public string Password { get; set; }
+        
+        [JsonPropertyName("avatarUrl")]
+        [StringLength(2084, ErrorMessage = "url cannot exceed 2084 characters")]
+        public string AvatarUrl { get; set; }
     }
 }

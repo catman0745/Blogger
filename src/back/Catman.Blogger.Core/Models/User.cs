@@ -7,5 +7,7 @@ namespace Catman.Blogger.Core.Models
         public string FullName { get; set; }
         
         public string Password { get; set; }
+        
+        public string AvatarUrl { get; set; }
     }
 }

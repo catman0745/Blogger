@@ -29,6 +29,11 @@ namespace Catman.Blogger.Data.EntitiesConfigurations
                 .HasColumnName("password")
                 .HasMaxLength(25)
                 .IsRequired();
+
+            builder
+                .Property(user => user.AvatarUrl)
+                .HasColumnName("avatar")
+                .HasMaxLength(2084);
         }
     }
 }
