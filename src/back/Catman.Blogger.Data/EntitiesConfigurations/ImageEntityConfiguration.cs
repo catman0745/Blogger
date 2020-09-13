@@ -4,7 +4,7 @@ namespace Catman.Blogger.Data.EntitiesConfigurations
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class ImageEntityConfiguration : IEntityTypeConfiguration<Image>
+    internal class ImageEntityConfiguration : IEntityTypeConfiguration<Image>
     {
         public void Configure(EntityTypeBuilder<Image> builder)
         {

@@ -11,7 +11,6 @@ namespace Catman.Blogger.API.Mappings
         {
             CreateMap<Comment, CommentReadDto>();
             CreateMap<CreateCommentRequestDto, CreateCommentRequest>();
-            CreateMap<CreateCommentRequest, Comment>();
         }
     }
 }

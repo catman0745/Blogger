@@ -11,7 +11,5 @@ namespace Catman.Blogger.Core.Models
         public DateTime CreatedAt { get; set; }
         
         public string OwnerUsername { get; set; }
-        
-        public User Owner { get; set; }
     }
 }

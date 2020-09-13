@@ -16,6 +16,11 @@ namespace Catman.Blogger.Data.EntitiesConfigurations
                 .IsUnique();
 
             builder
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(blog => blog.OwnerUsername);
+
+            builder
                 .Property(blog => blog.Id)
                 .HasColumnName("id");
             
