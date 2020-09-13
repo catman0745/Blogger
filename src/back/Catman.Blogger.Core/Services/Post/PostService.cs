@@ -66,6 +66,8 @@ namespace Catman.Blogger.Core.Services.Post
             }
 
             var post = await _posts.GetAsync(id);
+            await ViewPost(post);
+            
             return Success(post);
         }
 
@@ -127,6 +129,13 @@ namespace Catman.Blogger.Core.Services.Post
             await _unitOfWork.SaveChangesAsync();
 
             return Success(post);
+        }
+
+        private async Task ViewPost(Post post)
+        {
+            post.ViewsCount++;
+            _posts.Update(post);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

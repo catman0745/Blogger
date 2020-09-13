@@ -14,6 +14,8 @@ namespace Catman.Blogger.Core.Models
         
         public DateTime LastUpdate { get; set; }
         
+        public int ViewsCount { get; set; }
+        
         public Guid BlogId { get; set; }
     }
 }

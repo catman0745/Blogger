@@ -33,7 +33,7 @@ namespace Catman.Blogger.API.Controllers
             }
             var post = response.Result;
 
-            var readDto = _mapper.Map<PostReadDto>(post);
+            var readDto = _mapper.Map<PostRichReadDto>(post);
             return Ok(readDto);
         }
         
@@ -43,7 +43,7 @@ namespace Catman.Blogger.API.Controllers
             var response = await _posts.GetAllAsync();
             var posts = response.Result;
 
-            var readDtos = _mapper.Map<ICollection<PostReadDto>>(posts);
+            var readDtos = _mapper.Map<ICollection<PostSmallReadDto>>(posts);
             return Ok(readDtos);
         }
         
@@ -61,7 +61,7 @@ namespace Catman.Blogger.API.Controllers
             }
             var post = response.Result;
 
-            var readDto = _mapper.Map<PostReadDto>(post);
+            var readDto = _mapper.Map<PostRichReadDto>(post);
             return StatusCode(StatusCodes.Status201Created, readDto);
         }
         
@@ -80,7 +80,7 @@ namespace Catman.Blogger.API.Controllers
             }
             var post = response.Result;
 
-            var readDto = _mapper.Map<PostReadDto>(post);
+            var readDto = _mapper.Map<PostRichReadDto>(post);
             return Ok(readDto);
         }
         
@@ -101,7 +101,7 @@ namespace Catman.Blogger.API.Controllers
             }
             var post = response.Result;
 
-            var readDto = _mapper.Map<PostReadDto>(post);
+            var readDto = _mapper.Map<PostRichReadDto>(post);
             return Ok(readDto);
         }
     }

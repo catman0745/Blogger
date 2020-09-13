@@ -45,6 +45,10 @@ namespace Catman.Blogger.Data.EntitiesConfigurations
                 .HasColumnName("last_update");
 
             builder
+                .Property(post => post.ViewsCount)
+                .HasColumnName("views");
+
+            builder
                 .Property(post => post.BlogId)
                 .HasColumnName("blog_id");
         }

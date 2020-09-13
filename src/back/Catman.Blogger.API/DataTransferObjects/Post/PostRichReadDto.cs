@@ -3,7 +3,7 @@ namespace Catman.Blogger.API.DataTransferObjects.Post
     using System;
     using System.Text.Json.Serialization;
     
-    public class PostReadDto
+    public class PostRichReadDto
     {
         [JsonPropertyName("id")]
         public Guid Id { get; set; }
@@ -19,6 +19,9 @@ namespace Catman.Blogger.API.DataTransferObjects.Post
         
         [JsonPropertyName("lastUpdate")]
         public DateTime LastUpdate { get; set; }
+        
+        [JsonPropertyName("views")]
+        public int ViewsCount { get; set; }
         
         [JsonPropertyName("blogId")]
         public Guid BlogId { get; set; }

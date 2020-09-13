@@ -11,7 +11,8 @@ namespace Catman.Blogger.API.Mappings
         {
             CreateMap<CreatePostRequestDto, CreatePostRequest>();
             CreateMap<EditPostRequestDto, EditPostRequest>();
-            CreateMap<Post, PostReadDto>();
+            CreateMap<Post, PostRichReadDto>();
+            CreateMap<Post, PostSmallReadDto>();
         }
     }
 }
