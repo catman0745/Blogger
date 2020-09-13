@@ -8,6 +8,7 @@ namespace Catman.Blogger.API.Extensions
     using Catman.Blogger.Core.Helpers.Time;
     using Catman.Blogger.Core.Repositories;
     using Catman.Blogger.Core.Services.Blog;
+    using Catman.Blogger.Core.Services.Comment;
     using Catman.Blogger.Core.Services.Common;
     using Catman.Blogger.Core.Services.Image;
     using Catman.Blogger.Core.Services.Post;
@@ -36,7 +37,8 @@ namespace Catman.Blogger.API.Extensions
                 .AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IBlogRepository, BlogRepository>()
                 .AddScoped<IPostRepository, PostRepository>()
-                .AddScoped<IImageRepository, ImageRepository>();
+                .AddScoped<IImageRepository, ImageRepository>()
+                .AddScoped<ICommentRepository, CommentRepository>();
 
             return services;
         }
@@ -47,7 +49,8 @@ namespace Catman.Blogger.API.Extensions
                 .AddScoped<IUserService, UserService>()
                 .AddScoped<IBlogService, BlogService>()
                 .AddScoped<IPostService, PostService>()
-                .AddScoped<IImageService, ImageService>();
+                .AddScoped<IImageService, ImageService>()
+                .AddScoped<ICommentService, CommentService>();
 
             return services;
         }
