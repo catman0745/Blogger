@@ -24,7 +24,7 @@ namespace Catman.Blogger.API.Extensions
     {
         public static IServiceCollection ConfigureDbContext(this IServiceCollection services)
         {
-            var connectionString = GetEnvironmentVariable("BLOGGER_DB_CONNECTION");
+            var connectionString = FromEnvironment("BLOGGER_DB_CONNECTION");
             services.AddDbContext<BloggerDbContext>(options => options.UseNpgsql(connectionString));
             
             return services;
@@ -59,10 +59,10 @@ namespace Catman.Blogger.API.Extensions
         {
             var authOptions = new AuthOptions()
             {
-                Issuer = GetEnvironmentVariable("BLOGGER_AUTH_ISSUER"),
-                Audience = GetEnvironmentVariable("BLOGGER_AUTH_AUDIENCE"),
-                Lifetime = int.Parse(GetEnvironmentVariable("BLOGGER_AUTH_LIFETIME")),
-                Key = GetEnvironmentVariable("BLOGGER_AUTH_KEY")
+                Issuer = FromEnvironmentOrDefault("BLOGGER_AUTH_ISSUER", "Catman.Blogger.API"),
+                Audience = FromEnvironmentOrDefault("BLOGGER_AUTH_AUDIENCE", "Catman.Blogger.Client"),
+                Lifetime = int.Parse(FromEnvironmentOrDefault("BLOGGER_AUTH_LIFETIME", "10080")),
+                Key = FromEnvironment("BLOGGER_AUTH_KEY")
             };
             services
                 .AddSingleton<IAuthOptions>(authOptions)
@@ -98,9 +98,9 @@ namespace Catman.Blogger.API.Extensions
         {
             var fileOptions = new FileOptions()
             {
-                MaxImageSize = long.Parse(GetEnvironmentVariable("BLOGGER_FILES_IMG_MAX_MB")) * 1024 * 1024,
-                SupportedImageTypes = GetEnvironmentVariable("BLOGGER_FILES_IMG_TYPES").Split(';'),
-                UploadsDirectoryPath = GetEnvironmentVariable("BLOGGER_FILES_UPLOAD_DIR")
+                MaxImageSize = long.Parse(FromEnvironmentOrDefault("BLOGGER_FILES_IMG_MAX_MB", "5")) * 1024 * 1024,
+                SupportedImageTypes = FromEnvironment("BLOGGER_FILES_IMG_TYPES").Split(';'),
+                UploadsDirectoryPath = FromEnvironment("BLOGGER_FILES_UPLOAD_DIR")
             };
             
             services
@@ -119,7 +119,7 @@ namespace Catman.Blogger.API.Extensions
             return services;
         }
 
-        private static string GetEnvironmentVariable(string variableName)
+        private static string FromEnvironment(string variableName)
         {
             var variable = Environment.GetEnvironmentVariable(variableName);
             if (string.IsNullOrWhiteSpace(variable))
@@ -128,6 +128,15 @@ namespace Catman.Blogger.API.Extensions
             }
 
             return variable;
+        }
+
+        private static string FromEnvironmentOrDefault(string variableName, string defaultValue)
+        {
+            var variable = Environment.GetEnvironmentVariable(variableName);
+            
+            return string.IsNullOrWhiteSpace(variable)
+                ? defaultValue
+                : variable;
         }
     }
 }
