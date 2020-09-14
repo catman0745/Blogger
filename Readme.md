@@ -15,7 +15,7 @@ Set few environment variables:
 - `BLOGGER_AUTH_LIFETIME` is token lifetime in minutes (**default** is 10080 e.g. 7 days)
 - `BLOGGER_AUTH_KEY` is jwt encryption key and it **must be** at least 16 characters long (e.g. blogger_token_key)
 - `BLOGGER_FILES_IMG_MAX_MB` is max image size im MegaBytes (**default** is 5 MB)
-- `BLOGGER_FILES_IMG_TYPES` is list of MIME content types recognized as image
+- `BLOGGER_FILES_IMG_TYPES` is list of MIME content types (separated by `;`) recognized as image
 - `BLOGGER_FILES_UPLOAD_DIR` is relative path from the API project directory to the uploads folder
 
 Apply migrations (run inside the cloned repo folder):
